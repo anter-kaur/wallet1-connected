@@ -9,20 +9,22 @@ function App() {
   const [account, setAccount] = useState('');
   const [value, setValue] = useState('');
   const [addValue, setAddValue] = useState(0);
-  // const [contract,setContract]=useState('');
+  const [web3, setWeb3] = useState(null);
+  const [contract, setContract] = useState(null);
 
   useEffect(() => {
     const connectMetamask = async () => {
       const provider = await detectEthereumProvider();
       if (provider) {
-        const web3 = new Web3(provider);
+        const web3Instance = new Web3(provider);
+        setWeb3(web3Instance);
         try {
           await provider.request({ method: "eth_requestAccounts" });
-          const accounts = await web3.eth.getAccounts();
+          const accounts = await web3Instance.eth.getAccounts();
           setAccount(accounts[0]);
 
-          const contract= new web3.eth.Contract(contractAbi, contractAddress);
-          console.log(account);
+          const contractInstance = new web3Instance.eth.Contract(contractAbi, contractAddress);
+          setContract(contractInstance);
         } catch (error) {
           console.error("Error while connecting to contract:", error);
         }
@@ -34,33 +36,35 @@ function App() {
     connectMetamask();
   }, []);
 
-// const handleSubmit=async ()=>{
-//   const setval=await contract.methods.set(addValue).send({from:account});
-//           const result = await contract.methods.get().call();
-//           console.log('in effect hook: ',result)
-//           setValue(result.toString());
-// }
-
-
   const handleSubmit = async () => {
-    const provider = await detectEthereumProvider();
-    if (provider) {
-      const web3 = new Web3(provider);
+    if (web3 && contract) {
       try {
-        const contract = new web3.eth.Contract(contractAbi, contractAddress);
-        await contract.methods.set(addValue).send({ from: account });
-
+        await sendTransaction(addValue);
         const result = await contract.methods.get().call();
         setValue(result.toString());
-        console.log('in submit: ',result)
-      } 
-      catch (error) {
+        console.log('Transaction result:', result);
+      } catch (error) {
         console.error("Error while sending transaction:", error);
       }
-    } 
-    // else {
-    //   console.error("Install Metamask");
-    // }
+    } else {
+      console.error("Web3 or contract not initialized");
+    }
+  };
+
+  const sendTransaction = async (valueToAdd) => {
+    try {
+      const gasEstimate = await contract.methods.set(valueToAdd).estimateGas({ from: account });
+      const tx = {
+        from: account,
+        to: contractAddress,
+        gas: gasEstimate,
+        data: contract.methods.set(valueToAdd).encodeABI()
+      };
+      const receipt = await web3.eth.sendTransaction(tx);
+      console.log('Transaction successful:', receipt);
+    } catch (error) {
+      console.error('Error while sending transaction:', error.message);
+    }
   };
 
   return (
@@ -69,6 +73,7 @@ function App() {
       <p>Account: {account}</p>
       <input
         type='text'
+        value={addValue}
         onChange={(e) => setAddValue(e.target.value)}
       />
       <button type='submit' onClick={handleSubmit}>Submit</button>
