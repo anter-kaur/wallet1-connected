@@ -53,12 +53,18 @@ function App() {
 
   const sendTransaction = async (valueToAdd) => {
     try {
-      const gasEstimate = await contract.methods.set(valueToAdd).estimateGas({ from: account });
+      // Ensure valueToAdd is a valid number and within the range of uint8
+      const parsedValueToAdd = parseInt(valueToAdd);
+      if (isNaN(parsedValueToAdd) || parsedValueToAdd < 0 || parsedValueToAdd > 255) {
+        throw new Error("Invalid value to add. Must be a number between 0 and 255.");
+      }
+
+      const gasEstimate = await contract.methods.set(parsedValueToAdd).estimateGas({ from: account });
       const tx = {
         from: account,
         to: contractAddress,
         gas: gasEstimate,
-        data: contract.methods.set(valueToAdd).encodeABI()
+        data: contract.methods.set(parsedValueToAdd).encodeABI()
       };
       const receipt = await web3.eth.sendTransaction(tx);
       console.log('Transaction successful:', receipt);
@@ -72,9 +78,11 @@ function App() {
       <h1>Smart Contract Integration</h1>
       <p>Account: {account}</p>
       <input
-        type='text'
+        type='number'
         value={addValue}
         onChange={(e) => setAddValue(e.target.value)}
+        min="0"
+        max="255"
       />
       <button type='submit' onClick={handleSubmit}>Submit</button>
       <p>Value from contract: {value}</p>

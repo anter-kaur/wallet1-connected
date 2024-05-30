@@ -25,6 +25,6 @@ export const contractAbi = [
 		"stateMutability": "view",
 		"type": "function"
 	}
-]
+];
 
-export const contractAddress = '0x9F708FB31cC3EA4E74795D2D7138F130eFB1b45f';
+export const contractAddress = '0x58B58e7Afb156AcfC87e21E3C6A847fEca954Dfa';
