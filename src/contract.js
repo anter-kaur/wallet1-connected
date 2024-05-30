@@ -2,9 +2,9 @@ export const contractAbi = [
 	{
 		"inputs": [
 			{
-				"internalType": "uint256",
+				"internalType": "uint8",
 				"name": "_number",
-				"type": "uint256"
+				"type": "uint8"
 			}
 		],
 		"name": "set",
@@ -17,9 +17,9 @@ export const contractAbi = [
 		"name": "get",
 		"outputs": [
 			{
-				"internalType": "uint256",
+				"internalType": "uint8",
 				"name": "",
-				"type": "uint256"
+				"type": "uint8"
 			}
 		],
 		"stateMutability": "view",
@@ -27,4 +27,4 @@ export const contractAbi = [
 	}
 ]
 
-export const contractAddress = '0x02a229870D4F2a22eFA6985B159898d3b115bFA3';
+export const contractAddress = '0x9F708FB31cC3EA4E74795D2D7138F130eFB1b45f';
